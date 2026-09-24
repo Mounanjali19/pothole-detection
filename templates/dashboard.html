@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pothole Mapper: A Geospatial City Visualization</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.85.1/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+
+
+
+ <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Arial', sans-serif;
+            background-color: #ecf0f1;
+        }
+
+        #header {
+            background-color: black;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        #map {
+            flex: 1;
+        }
+
+        .popup-content {
+            text-align: center;
+        }
+
+        .popup-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Pothole Mapper</h1>
+        <a href = "output">display</a>
+        <a href = "/">upload</a>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="analysisReport"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol@0.85.1/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script>
+
+
+
+    let cityMap;
+    let pinMarker; // To keep track of the placed pin
+
+    // Function to initialize the city map
+    function initCityMap() {
+        cityMap = L.map('map').setView([20, 77], 5); // Default center (India)
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(cityMap);
+        L.control.locate().addTo(cityMap);
+        L.Control.geocoder().addTo(cityMap);
+        L.Control.locate().addTo(cityMap);
+
+    }
+
+
+
+
+    function addPotholeMarkers() {
+    fetch('../static/pothole_data.json')
+        .then(response => response.json())
+        .then(data => {
+            if (data && Array.isArray(data)) {
+                data.forEach(pothole => {
+                    // Extract data from pothole object
+                    const lat = pothole.latitude;
+                    const lng = pothole.longitude;
+                    const imageURL = pothole.output_image;
+                    const timestamp = pothole.time;
+                    const severity = pothole.severity; // Extract severity
+
+                    // Call addPotholeMarker with extracted data
+                    addPotholeMarker(lat, lng, imageURL, timestamp, severity);
+                });
+            } else {
+                console.error('Invalid pothole data format');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching pothole data:', error);
+        });
+}
+
+
+
+
+// Function to add a pothole marker with popup
+function addPotholeMarker(lat, lng, imageURL, timestamp, severity) {
+    var greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+   var marker = L.marker([lat, lng], {icon: greenIcon}).addTo(cityMap);
+    var formattedTimestamp = new Date(timestamp).toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+    });
+
+    var popupContent = `<div class="popup-content">`;
+    popupContent+=`${lat} , ${lng} , `
+  popupContent += `<img src = "${imageURL}" alt = "pothole" class = "popup-image">`;
+    popupContent += `Severity: ${severity}<br>`; // Include severity in popup content
+    popupContent += `Reported Date: ${formattedTimestamp}</div>`;
+    marker.bindPopup(popupContent);
+}
+
+
+// Call the function to add pothole markers when the page loads
+document.addEventListener('DOMContentLoaded', addPotholeMarkers);
+// Initialize the city map when the script is loaded
+document.addEventListener('DOMContentLoaded', initCityMap);
+
+
+
+</script>
+    
+</body>
+</html>

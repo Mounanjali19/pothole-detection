@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.env
+
+# Runtime / generated files
+static/output_images/*
+inputs/*
+static/pothole_data.json
+*.mp4
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Model/cache artifacts
+runs/
+wandb/

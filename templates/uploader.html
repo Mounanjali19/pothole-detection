@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org"></html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload your file over here</title>
+</head>
+<body>
+
+    <button id = "get_location">provide location</button>
+
+    <form method = 'post' enctype = 'multipart/form-data'>
+        <input type = 'file' name = 'file'>
+        <button type = 'submit'>Upload</button> 
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        
+    <!--Getting user location-->
+       $('#get_location').click(function(){
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(function(position){
+
+                const location ={
+                     longitude: position.coords.longitude,
+                    latitude : position.coords.latitude
+                }
+            })
+        }
+        else{
+            console.log("geolocation not supported");
+        }
+       });
+
+       
+      
+
+    </script>
+
+        <a href = "dashboard">dashboard</a>
+        <a href = "output">display</a>
+</body>
+</html> 
